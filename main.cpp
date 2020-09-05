@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <algorithm>
+#include "rrc.h"
 using namespace std;
 
 static const int sequence_length = 127;
@@ -51,36 +52,90 @@ vector<int> sss_sequence(const int N1, const int N2)
     return sss;
 }
 
+int choice()
+{
+    int input=0;
+    while(!valid(input, 1, 2))
+    {
+        cout << "1: Generate PSS and SSS sequence from PCI.\n";
+        cout << "2: Schedule SI Messages.\n";
+        cout << "Please enter the choice: ";
+        cin >> input;
+    }
 
-// To execute C++, please define "int main()"
-int main() {
+    return input;
+}
 
-    int N1 = -1;
+void get_N1_N2(int &N1, int &N2)
+{
+    N1 = -1;
     do{
         cout << "N1(0-335): ";
         cin >> N1;
     }while(!valid(N1, 0, 335));
 
-    int N2 = -1;
+    N2 = -1;
     do{
         cout << "N2(0-2): ";
         cin >> N2;
     }while(!valid(N2, 0, 2));
+}
 
-    int pci = (3*N1)+N2;
-    cout << "PCI(0-1007) is " << pci << endl;
+void schedule_si(rrc_sl windowLength, vector<rrc_rf> siPeriodicity)
+{
 
-    vector<int> pss = pss_sequence(N2);
-    cout << "PSS is BPSK M-sequenec of length 127 based on N2" << endl;
-    for(auto i=0; i<sequence_length; i++)
-        cout << i << ':' << pss[i] << ' ';
-    cout << endl;
+}
 
-    vector<int> sss = sss_sequence(N1, N2);
-    cout << "SSS is Gold sequenec of length 127 based on N1, N2" << endl;
-    for(auto i=0; i<sequence_length; i++)
-        cout << i << ':' << sss[i] << ' ';
-    cout << endl;
+// To execute C++, please define "int main()"
+int main() {
+    int input = choice();
 
-    return 0;
+    switch(input)
+    {
+        case 1:
+            {
+                int N1, N2;
+                get_N1_N2(N1, N2);
+
+                int pci = (3*N1)+N2;
+                cout << "PCI(0-1007) is " << pci << endl;
+
+                vector<int> pss = pss_sequence(N2);
+                cout << "PSS is BPSK M-sequenec of length 127 based on N2" << endl;
+                for(auto i=0; i<sequence_length; i++)
+                    cout << i << ':' << pss[i] << ' ';
+                cout << endl;
+
+                vector<int> sss = sss_sequence(N1, N2);
+                cout << "SSS is Gold sequenec of length 127 based on N1, N2" << endl;
+                for(auto i=0; i<sequence_length; i++)
+                    cout << i << ':' << sss[i] << ' ';
+                cout << endl;
+                break;
+            }
+        case 2:
+            {
+                int x;
+                cout << "windowLength(0-9): ";
+                cin >> x;
+                rrc_sl windowLength = static_cast<rrc_sl>(x);
+
+                int siCount;
+                cout << "siCount: ";
+                cin >> siCount;
+
+                vector<rrc_rf> siPeriodicity;
+                for(auto i=0; i<siCount; i++)
+                {
+                    cout << "siPeriodicity(0-6) for SI Msg " << i << ": ";
+                    cin >> x;
+                    rrc_rf periodicity = static_cast<rrc_rf>(x);
+                    siPeriodicity.push_back(periodicity);
+                }
+                schedule_si(windowLength, siPeriodicity);
+                break;
+            }
+
+            return 0;
+    }
 }
